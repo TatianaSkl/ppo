@@ -4,10 +4,11 @@
   "private": true,
   "homepage": "https://TatianaSkl.github.io/ppo/",
   "dependencies": {
-    "@hookform/resolvers": "^3.10.0",
     "cra-template": "1.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
+    "react-hook-form-persist": "^3.0.0",
     "react-scripts": "5.0.1"
   },
   "scripts": {
