@@ -102,19 +102,19 @@ const Form = () => {
 
   const onSubmit = data => {
     const sanitizedData = {
-      П: data.position,
-      'н.п.': data.locality,
-      Ціль: data.target,
-      Кількість: data.numberOfTargets,
-      Дальність: data.range,
-      А: data.azimuth,
-      К: data.course,
-      Швидкість: data.speed,
-      Час: data.time,
-      Виявив: data.found,
-      Вогонь: data.fire,
-      Результат: data.result,
-      'Робота суміжних підрозділів': data.weapon,
+      П: data.position || '-',
+      'н.п.': data.locality || '-',
+      Ціль: data.target || '-',
+      Кількість: data.numberOfTargets || '-',
+      Відстань: data.range || '-',
+      А: data.azimuth || '-',
+      К: data.course || '-',
+      Швидкість: data.speed || '-',
+      Час: data.time || '-',
+      Виявив: data.found || '-',
+      Вогонь: data.fire || '-',
+      Результат: data.result || '-',
+      'Робота суміжних підрозділів': data.weapon.length > 0 ? data.weapon.join(', ') : '-',
       Розхід: data.consumption || '-',
     };
 
@@ -124,7 +124,9 @@ const Form = () => {
       ...Object.entries(sanitizedData).map(([key, value]) => `${key}: ${value}`),
     ].join('\n');
 
-    navigator.clipboard.writeText(message);
+    navigator.clipboard.writeText(message).then(() => {
+      alert('Дані скопійовано у буфер обміну!');
+    });
   };
 
   return (
@@ -193,7 +195,7 @@ const Form = () => {
       <div className="pb-4">
         <div className="flex justify-between">
           <label className="label mr-2" htmlFor="range">
-            Дальність до цілі (м):
+            Відстань до цілі (м):
           </label>
           <div>
             <button
