@@ -24,6 +24,22 @@ const Form = () => {
 
   useFormPersist('targetForm', { watch, setValue, storage: window.localStorage });
 
+  useEffect(() => {
+    const savedPosition = localStorage.getItem('position');
+    if (savedPosition) {
+      setValue('position', savedPosition);
+    }
+  }, [setValue]);
+
+  useEffect(() => {
+    const subscription = watch(value => {
+      if (value.position !== undefined) {
+        localStorage.setItem('position', value.position);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
   const getCurrentTime = () => {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, '0');
@@ -73,7 +89,6 @@ const Form = () => {
 
   const onSubmit = data => {
     const sanitizedData = {
-      ...data,
       П: data.position,
       'н.п.': data.locality,
       Ціль: data.target,
@@ -87,20 +102,14 @@ const Form = () => {
       Вогонь: data.fire,
       Результат: data.result,
       Зброя: data.weapon,
-      Розхід: data.consumption,
+      Розхід: data.consumption || '-',
     };
 
-    const message = JSON.stringify(sanitizedData, null, 2);
+    const message = Object.entries(sanitizedData)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n');
 
-    const openMessenger = messengerUrl => {
-      window.open(messengerUrl, '_blank');
-    };
-
-    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(message)}`;
-    const viberUrl = `viber://forward?text=${encodeURIComponent(message)}`;
-
-    openMessenger(telegramUrl);
-    openMessenger(viberUrl);
+    navigator.clipboard.writeText(message);
   };
 
   return (
@@ -163,17 +172,21 @@ const Form = () => {
             Дальність до цілі (м):
           </label>
           <div>
-            <button type="button" className="button mr-2" onClick={() => setValue('range', '5000')}>
+            <button
+              type="button"
+              className="button mr-2"
+              onClick={() => setValue('range', '5000+')}
+            >
               5+ км
             </button>
-            <button type="button" className="button" onClick={() => setValue('range', '10000')}>
+            <button type="button" className="button" onClick={() => setValue('range', '10000+')}>
               10+ км
             </button>
           </div>
         </div>
         <input
           className="input"
-          type="number"
+          type="text"
           id="range"
           {...register('range')}
           value={watch('range')}
@@ -221,14 +234,6 @@ const Form = () => {
           <label className="label" htmlFor="speed">
             Швидкість цілі:
           </label>
-          <div className="space-x-2">
-            <button type="button" className="button">
-              5+ км
-            </button>
-            <button type="button" className="button">
-              10+ км
-            </button>
-          </div>
         </div>
         <input className="input" id="speed" {...register('speed')} />
       </div>
@@ -303,7 +308,7 @@ const Form = () => {
       </div>
 
       <button type="submit" className="flex bg-indigo-500 rounded text-white px-2 text-xl m-auto">
-        Поширити
+        Копіювати
       </button>
     </form>
   );
