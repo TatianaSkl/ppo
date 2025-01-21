@@ -118,9 +118,11 @@ const Form = () => {
       Розхід: data.consumption || '-',
     };
 
-    const message = Object.entries(sanitizedData)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join('\n');
+    const message = [
+      `Сектор "Захід" (1020 зрап)`,
+      `зрадн в/ч 3027`,
+      ...Object.entries(sanitizedData).map(([key, value]) => `${key}: ${value}`),
+    ].join('\n');
 
     navigator.clipboard.writeText(message);
   };
