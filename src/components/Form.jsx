@@ -25,7 +25,6 @@ const Form = () => {
   useFormPersist('targetForm', { watch, setValue, storage: window.localStorage });
 
   useEffect(() => {
-    // Восстанавливаем только `position` из localStorage
     const savedPosition = localStorage.getItem('position');
     reset({
       position: savedPosition || '',
@@ -115,7 +114,7 @@ const Form = () => {
       Виявив: data.found,
       Вогонь: data.fire,
       Результат: data.result,
-      Зброя: data.weapon,
+      'Робота суміжних підрозділів': data.weapon,
       Розхід: data.consumption || '-',
     };
 
@@ -129,7 +128,7 @@ const Form = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="py-4">
       <p className="dark:text-gray-400">Сектор "Захід" (1020 зрап)</p>
-      <p className="pb-4 dark:text-gray-400">зрдн в/ч 3027</p>
+      <p className="pb-4 dark:text-gray-400">зрадн в/ч 3027</p>
 
       <div className="pb-4">
         <label className="label" htmlFor="position">
@@ -166,7 +165,16 @@ const Form = () => {
             'Виходи',
           ].map(target => (
             <label key={target} className="label-radio">
-              <input className="input-radio" type="radio" value={target} {...register('target')} />
+              <input
+                className="input-radio"
+                type="radio"
+                value={target}
+                checked={watch('target') === target}
+                onClick={() => {
+                  const currentValue = watch('target');
+                  setValue('target', currentValue === target ? '' : target);
+                }}
+              />
               {target}
             </label>
           ))}
@@ -182,10 +190,17 @@ const Form = () => {
 
       <div className="pb-4">
         <div className="flex justify-between">
-          <label className="label" htmlFor="range">
+          <label className="label mr-2" htmlFor="range">
             Дальність до цілі (м):
           </label>
           <div>
+            <button
+              type="button"
+              className="button mr-2"
+              onClick={() => setValue('range', '2000+')}
+            >
+              2+ км
+            </button>
             <button
               type="button"
               className="button mr-2"
@@ -266,7 +281,16 @@ const Form = () => {
         <div className="grid grid-cols-2">
           {['Акустично', 'Візуально', 'Радіолокаційно'].map(found => (
             <label key={found} className="label-radio">
-              <input className="input-radio" type="radio" value={found} {...register('found')} />
+              <input
+                className="input-radio"
+                type="radio"
+                value={found}
+                checked={watch('found') === found}
+                onClick={() => {
+                  const currentValue = watch('found');
+                  setValue('found', currentValue === found ? '' : found);
+                }}
+              />
               {found}
             </label>
           ))}
@@ -278,7 +302,16 @@ const Form = () => {
         <div className="grid grid-cols-2">
           {['Відкривали', 'Не відкривали'].map(fire => (
             <label key={fire} className="label-radio">
-              <input className="input-radio" type="radio" value={fire} {...register('fire')} />
+              <input
+                className="input-radio"
+                type="radio"
+                value={fire}
+                checked={watch('fire') === fire}
+                onClick={() => {
+                  const currentValue = watch('fire');
+                  setValue('fire', currentValue === fire ? '' : fire);
+                }}
+              />
               {fire}
             </label>
           ))}
@@ -290,7 +323,16 @@ const Form = () => {
         <div className="grid grid-cols-2">
           {['Знищена', 'Обстріляна'].map(result => (
             <label key={result} className="label-radio">
-              <input className="input-radio" type="radio" value={result} {...register('result')} />
+              <input
+                className="input-radio"
+                type="radio"
+                value={result}
+                checked={watch('result') === result}
+                onClick={() => {
+                  const currentValue = watch('result');
+                  setValue('result', currentValue === result ? '' : result);
+                }}
+              />
               {result}
             </label>
           ))}
@@ -298,7 +340,7 @@ const Form = () => {
       </div>
 
       <div className="pb-4">
-        <label className="label">Зброя:</label>
+        <label className="label">Робота суміжних підрозділів:</label>
         <div className="grid grid-cols-2">
           {['ППО', 'ПЗРК', 'ЗУ', 'Кулемет'].map(weapon => (
             <label key={weapon} className="label-radio">
