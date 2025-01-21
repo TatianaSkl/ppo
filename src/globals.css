@@ -16,7 +16,7 @@ html {
   }
 
   .input {
-    @apply border-gray-300 dark:border-gray-700 dark:bg-gray-100 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm pl-2 text-lg mt-1 block w-full;
+    @apply border-gray-300 dark:border-gray-700 dark:bg-gray-300 dark:text-gray-800 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm pl-2 text-lg mt-1 block w-full;
   }
 
   .input-radio {

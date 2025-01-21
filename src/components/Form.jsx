@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import useFormPersist from 'react-hook-form-persist';
 
 const Form = () => {
-  const { register, handleSubmit, watch, setValue } = useForm({
+  const { register, handleSubmit, watch, setValue, reset } = useForm({
     defaultValues: {
       position: '',
       locality: '',
@@ -25,11 +25,25 @@ const Form = () => {
   useFormPersist('targetForm', { watch, setValue, storage: window.localStorage });
 
   useEffect(() => {
+    // Восстанавливаем только `position` из localStorage
     const savedPosition = localStorage.getItem('position');
-    if (savedPosition) {
-      setValue('position', savedPosition);
-    }
-  }, [setValue]);
+    reset({
+      position: savedPosition || '',
+      locality: '',
+      target: '',
+      numberOfTargets: '',
+      range: '',
+      azimuth: '',
+      course: '',
+      speed: '',
+      time: '',
+      found: '',
+      fire: '',
+      result: '',
+      weapon: [],
+      consumption: '',
+    });
+  }, [reset]);
 
   useEffect(() => {
     const subscription = watch(value => {
@@ -114,8 +128,8 @@ const Form = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="py-4">
-      <p>Сектор "Захід" (1020 зрап)</p>
-      <p className="pb-4">зрдн в/ч 3027</p>
+      <p className="dark:text-gray-400">Сектор "Захід" (1020 зрап)</p>
+      <p className="pb-4 dark:text-gray-400">зрдн в/ч 3027</p>
 
       <div className="pb-4">
         <label className="label" htmlFor="position">
