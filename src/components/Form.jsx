@@ -4,7 +4,6 @@ import useFormPersist from 'react-hook-form-persist';
 
 const Form = () => {
   const [isTrackingAzimuth, setIsTrackingAzimuth] = useState(false);
-  const [azimuth, setAzimuth] = useState(null);
 
   const { register, handleSubmit, watch, setValue, reset } = useForm({
     defaultValues: {
@@ -115,7 +114,6 @@ const Form = () => {
     event => {
       if (event.alpha !== null && isTrackingAzimuth) {
         const currentAzimuth = Math.round(event.alpha);
-        setAzimuth(currentAzimuth);
         setValue('azimuth', currentAzimuth);
       }
     },
@@ -135,7 +133,6 @@ const Form = () => {
   const stopTracking = () => {
     setIsTrackingAzimuth(false);
     window.removeEventListener('deviceorientation', handleOrientation);
-    setValue('azimuth', azimuth);
   };
 
   useEffect(() => {
@@ -290,7 +287,7 @@ const Form = () => {
             <button
               type="button"
               className={`button ${
-                isTrackingAzimuth ? 'bg-red-500 hover:bg-red-600' : 'bg-sky-500 hover:bg-blue-600'
+                isTrackingAzimuth ? 'bg-red-500 hover:bg-red-600' : 'bg-sky-500 hover:bg-sky-600'
               }`}
               onClick={toggleTracking}
             >
@@ -303,12 +300,8 @@ const Form = () => {
           id="azimuth"
           type="number"
           {...register('azimuth')}
-          value={azimuth !== null ? azimuth : ''}
-          onChange={e => {
-            const value = e.target.value;
-            setAzimuth(value);
-            setValue('azimuth', value);
-          }}
+          value={watch('azimuth') || ''}
+          onChange={e => setValue('azimuth', e.target.value)}
         />
       </div>
 
