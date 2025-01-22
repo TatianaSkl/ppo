@@ -124,9 +124,20 @@ const Form = () => {
       ...Object.entries(sanitizedData).map(([key, value]) => `${key}: ${value}`),
     ].join('\n');
 
-    navigator.clipboard.writeText(message).then(() => {
-      alert('Дані скопійовано у буфер обміну!');
-    });
+    if (navigator.share) {
+      navigator
+        .share({
+          title: 'Повідомлення',
+          text: message,
+        })
+        .then(() => console.log('Повідомлення надіслано'))
+        .catch(error => console.error('Помилка при надсиланні:', error));
+    } else {
+      // Фоллбэк: копируем в буфер обмена, если "Поделиться" недоступно
+      navigator.clipboard.writeText(message).then(() => {
+        alert('Дані скопійовано у буфер обміну!');
+      });
+    }
   };
 
   return (
@@ -368,7 +379,7 @@ const Form = () => {
       </div>
 
       <button type="submit" className="flex bg-indigo-500 rounded text-white px-2 text-xl m-auto">
-        Копіювати
+        Поширити
       </button>
     </form>
   );
