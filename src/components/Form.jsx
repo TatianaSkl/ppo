@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import useFormPersist from 'react-hook-form-persist';
 
@@ -105,27 +105,44 @@ const Form = () => {
 
   const toggleTracking = () => {
     if (isTrackingAzimuth) {
-      window.removeEventListener('deviceorientation', handleOrientation);
-      setIsTrackingAzimuth(false);
+      stopTracking();
     } else {
-      window.addEventListener('deviceorientation', handleOrientation);
-      setIsTrackingAzimuth(true);
+      startTracking();
     }
   };
 
-  const handleOrientation = event => {
-    const { alpha } = event;
-    if (alpha !== null) {
-      setAzimuth(Math.round(alpha)); // `alpha` — это угол относительно севера (0–360°)
+  const handleOrientation = useCallback(
+    event => {
+      if (event.alpha !== null && isTrackingAzimuth) {
+        const currentAzimuth = Math.round(event.alpha);
+        setAzimuth(currentAzimuth);
+        setValue('azimuth', currentAzimuth);
+      }
+    },
+    [isTrackingAzimuth, setValue]
+  );
+
+  const startTracking = () => {
+    if (!window.DeviceOrientationEvent) {
+      alert('Ваш пристрій не підтримує відстеження орієнтації.');
+      return;
     }
+
+    setIsTrackingAzimuth(true);
+    window.addEventListener('deviceorientation', handleOrientation);
+  };
+
+  const stopTracking = () => {
+    setIsTrackingAzimuth(false);
+    window.removeEventListener('deviceorientation', handleOrientation);
+    setValue('azimuth', azimuth);
   };
 
   useEffect(() => {
-    // Убираем подписку, если компонент размонтирован
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);
     };
-  }, []);
+  }, [handleOrientation]);
 
   const onSubmit = data => {
     const sanitizedData = {
@@ -270,7 +287,13 @@ const Form = () => {
             Азимут цілі:
           </label>
           <div>
-            <button type="button" className="button" onClick={toggleTracking}>
+            <button
+              type="button"
+              className={`button ${
+                isTrackingAzimuth ? 'bg-red-500 hover:bg-red-600' : 'bg-sky-500 hover:bg-blue-600'
+              }`}
+              onClick={toggleTracking}
+            >
               {isTrackingAzimuth ? 'Зупинити' : 'Отримати дані з компасу'}
             </button>
           </div>
@@ -281,7 +304,7 @@ const Form = () => {
           type="number"
           {...register('azimuth')}
           value={azimuth !== null ? azimuth : ''}
-          onChange={e => setAzimuth(e.target.value)}
+          readOnly={!isTrackingAzimuth}
         />
       </div>
 
