@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import useFormPersist from 'react-hook-form-persist';
 
 const Form = () => {
   const [isTrackingAzimuth, setIsTrackingAzimuth] = useState(false);
+  const [azimuth, setAzimuth] = useState(null);
 
   const { register, handleSubmit, watch, setValue, reset } = useForm({
     defaultValues: {
@@ -104,42 +105,26 @@ const Form = () => {
 
   const toggleTracking = () => {
     if (isTrackingAzimuth) {
-      stopTracking();
+      window.removeEventListener('deviceorientation', handleOrientation);
+      setIsTrackingAzimuth(false);
     } else {
-      startTracking();
+      window.addEventListener('deviceorientation', handleOrientation);
+      setIsTrackingAzimuth(true);
     }
   };
 
-  const handleOrientation = useCallback(
-    event => {
-      if (event.alpha !== null && isTrackingAzimuth) {
-        const currentAzimuth = Math.round(event.alpha);
-        setValue('azimuth', currentAzimuth);
-      }
-    },
-    [isTrackingAzimuth, setValue]
-  );
-
-  const startTracking = () => {
-    if (!window.DeviceOrientationEvent) {
-      alert('Ваш пристрій не підтримує відстеження орієнтації.');
-      return;
+  const handleOrientation = event => {
+    const { alpha } = event;
+    if (alpha !== null) {
+      setAzimuth(Math.round(alpha));
     }
-
-    setIsTrackingAzimuth(true);
-    window.addEventListener('deviceorientation', handleOrientation);
-  };
-
-  const stopTracking = () => {
-    setIsTrackingAzimuth(false);
-    window.removeEventListener('deviceorientation', handleOrientation);
   };
 
   useEffect(() => {
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);
     };
-  }, [handleOrientation]);
+  }, []);
 
   const onSubmit = data => {
     const sanitizedData = {
@@ -300,8 +285,8 @@ const Form = () => {
           id="azimuth"
           type="number"
           {...register('azimuth')}
-          value={watch('azimuth') || ''}
-          onChange={e => setValue('azimuth', e.target.value)}
+          value={azimuth !== null ? azimuth : ''}
+          onChange={e => setAzimuth(e.target.value)}
         />
       </div>
 
