@@ -304,7 +304,12 @@ const Form = () => {
           type="number"
           {...register('azimuth')}
           value={azimuth !== null ? azimuth : ''}
-          readOnly={!isTrackingAzimuth}
+          onChange={e => {
+            if (!isTrackingAzimuth) {
+              setAzimuth(Number(e.target.value));
+              setValue('azimuth', Number(e.target.value)); // Обновляем значение в react-hook-form
+            }
+          }}
         />
       </div>
 
