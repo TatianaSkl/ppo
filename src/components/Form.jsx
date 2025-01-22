@@ -1,8 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import useFormPersist from 'react-hook-form-persist';
 
 const Form = () => {
+  const [isTrackingAzimuth, setIsTrackingAzimuth] = useState(false);
+  const [azimuth, setAzimuth] = useState(null);
+
   const { register, handleSubmit, watch, setValue, reset } = useForm({
     defaultValues: {
       position: '',
@@ -100,6 +103,30 @@ const Form = () => {
     );
   };
 
+  const toggleTracking = () => {
+    if (isTrackingAzimuth) {
+      window.removeEventListener('deviceorientation', handleOrientation);
+      setIsTrackingAzimuth(false);
+    } else {
+      window.addEventListener('deviceorientation', handleOrientation);
+      setIsTrackingAzimuth(true);
+    }
+  };
+
+  const handleOrientation = event => {
+    const { alpha } = event;
+    if (alpha !== null) {
+      setAzimuth(Math.round(alpha)); // `alpha` — это угол относительно севера (0–360°)
+    }
+  };
+
+  useEffect(() => {
+    // Убираем подписку, если компонент размонтирован
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation);
+    };
+  }, []);
+
   const onSubmit = data => {
     const sanitizedData = {
       П: data.position || '-',
@@ -133,7 +160,6 @@ const Form = () => {
         .then(() => console.log('Повідомлення надіслано'))
         .catch(error => console.error('Помилка при надсиланні:', error));
     } else {
-      // Фоллбэк: копируем в буфер обмена, если "Поделиться" недоступно
       navigator.clipboard.writeText(message).then(() => {
         alert('Дані скопійовано у буфер обміну!');
       });
@@ -243,19 +269,19 @@ const Form = () => {
           <label className="label" htmlFor="azimuth">
             Азимут цілі:
           </label>
-          {/* <div>
+          <div>
             <button type="button" className="button" onClick={toggleTracking}>
-              {isTrackingAzimuth ? 'Остановить' : 'Отримати дані з компасу'}
+              {isTrackingAzimuth ? 'Зупинити' : 'Отримати дані з компасу'}
             </button>
-          </div> */}
+          </div>
         </div>
         <input
           className="input"
           id="azimuth"
           type="number"
           {...register('azimuth')}
-          // value={azimuth !== null ? azimuth : ''}
-          // onChange={e => setAzimuth(e.target.value)}
+          value={azimuth !== null ? azimuth : ''}
+          onChange={e => setAzimuth(e.target.value)}
         />
       </div>
 
@@ -378,7 +404,10 @@ const Form = () => {
         <input className="input" id="consumption" {...register('consumption')} />
       </div>
 
-      <button type="submit" className="flex bg-indigo-500 rounded text-white px-2 text-xl m-auto">
+      <button
+        type="submit"
+        className="flex bg-indigo-500 rounded text-white px-2 text-xl m-auto hover:bg-indigo-600 focus:bg-indigo-600"
+      >
         Поширити
       </button>
     </form>
