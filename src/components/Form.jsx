@@ -304,7 +304,11 @@ const Form = () => {
           type="number"
           {...register('azimuth')}
           value={azimuth !== null ? azimuth : ''}
-          onChange={e => setAzimuth(e.target.value)}
+          onChange={e => {
+            const value = e.target.value;
+            setAzimuth(value);
+            setValue('azimuth', value);
+          }}
         />
       </div>
 
