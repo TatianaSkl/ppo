@@ -120,7 +120,7 @@ const Form = () => {
   const stopCompass = () => {
     window.removeEventListener('deviceorientation', updateAzimuth);
     setIsTrackingAzimuth(false);
-    // setFixedAzimuth(watch('azimuth'));
+    setFixedAzimuth(watch('azimuth'));
   };
 
   const updateAzimuth = event => {
@@ -136,7 +136,7 @@ const Form = () => {
       Ціль: data.target || '-',
       Кількість: data.numberOfTargets || '-',
       Відстань: data.range || '-',
-      А: data.azimuth || '-',
+      А: fixedAzimuth || '-',
       К: data.course || '-',
       Швидкість: data.speed || '-',
       Час: data.time || '-',
@@ -287,8 +287,11 @@ const Form = () => {
           className="input"
           id="azimuth"
           type="number"
-          value={fixedAzimuth}
-          onChange={e => setFixedAzimuth(e.target.value)}
+          value={fixedAzimuth !== null ? fixedAzimuth : watch('azimuth')}
+          onChange={e => {
+            setFixedAzimuth(e.target.value);
+            setValue('azimuth', e.target.value);
+          }}
         />
       </div>
 
