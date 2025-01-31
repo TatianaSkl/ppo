@@ -25,7 +25,9 @@ const Form = () => {
   useFormPersist('targetForm', { watch, setValue, storage: window.localStorage });
 
   const [isTrackingAzimuth, setIsTrackingAzimuth] = useState(false);
+  const [isTrackingCourse, setIsTrackingCourse] = useState(false);
   const [fixedAzimuth, setFixedAzimuth] = useState(null);
+  const [fixedCourse, setFixedCourse] = useState(null);
 
   useEffect(() => {
     const savedPosition = localStorage.getItem('position');
@@ -103,7 +105,7 @@ const Form = () => {
     );
   };
 
-  const startCompass = async () => {
+  const startAzimuthTracking = async () => {
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
       const permission = await DeviceOrientationEvent.requestPermission();
       if (permission !== 'granted') {
@@ -117,7 +119,7 @@ const Form = () => {
     window.addEventListener('deviceorientation', updateAzimuth);
   };
 
-  const stopCompass = () => {
+  const stopAzimuthTracking = () => {
     window.removeEventListener('deviceorientation', updateAzimuth);
     setIsTrackingAzimuth(false);
     setFixedAzimuth(watch('azimuth'));
@@ -125,7 +127,32 @@ const Form = () => {
 
   const updateAzimuth = event => {
     if (event.alpha !== null) {
-      setValue('azimuth', Math.round(event.alpha));
+      setValue('azimuth', Math.round(360 - event.alpha));
+    }
+  };
+
+  const startCourseTracking = async () => {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      const permission = await DeviceOrientationEvent.requestPermission();
+      if (permission !== 'granted') {
+        alert('Доступ до компаса відхилено!');
+        return;
+      }
+    }
+
+    setIsTrackingCourse(true);
+    window.addEventListener('deviceorientation', updateCourse);
+  };
+
+  const stopCourseTracking = () => {
+    window.removeEventListener('deviceorientation', updateCourse);
+    setIsTrackingCourse(false);
+    setFixedCourse(watch('course'));
+  };
+
+  const updateCourse = event => {
+    if (event.alpha !== null) {
+      setValue('course', Math.round(360 - event.alpha));
     }
   };
 
@@ -137,7 +164,7 @@ const Form = () => {
       Кількість: data.numberOfTargets || '-',
       Відстань: data.range || '-',
       А: fixedAzimuth || '-',
-      К: data.course || '-',
+      К: fixedCourse || '-',
       Швидкість: data.speed || '-',
       Час: data.time || '-',
       Виявив: data.found || '-',
@@ -273,11 +300,11 @@ const Form = () => {
           </label>
           <div>
             {isTrackingAzimuth ? (
-              <button type="button" className="red" onClick={stopCompass}>
+              <button type="button" className="red" onClick={stopAzimuthTracking}>
                 Зупинити
               </button>
             ) : (
-              <button type="button" className="button" onClick={startCompass}>
+              <button type="button" className="button" onClick={startAzimuthTracking}>
                 Отримати дані з компасу
               </button>
             )}
@@ -300,13 +327,28 @@ const Form = () => {
           <label className="label" htmlFor="course">
             Курс цілі:
           </label>
-          {/* <div>
-            <button type="button" className="button">
-              Отримати дані з компасу
-            </button>
-          </div> */}
+          <div>
+            {isTrackingCourse ? (
+              <button type="button" className="red" onClick={stopCourseTracking}>
+                Зупинити
+              </button>
+            ) : (
+              <button type="button" className="button" onClick={startCourseTracking}>
+                Отримати дані з компасу
+              </button>
+            )}
+          </div>
         </div>
-        <input className="input" id="course" type="number" {...register('course')} />
+        <input
+          className="input"
+          id="course"
+          type="number"
+          value={fixedCourse !== null ? fixedCourse : watch('course')}
+          onChange={e => {
+            setFixedCourse(e.target.value);
+            setValue('course', e.target.value);
+          }}
+        />
       </div>
 
       <div className="pb-4">
