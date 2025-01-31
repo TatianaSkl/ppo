@@ -25,6 +25,7 @@ const Form = () => {
   useFormPersist('targetForm', { watch, setValue, storage: window.localStorage });
 
   const [isTrackingAzimuth, setIsTrackingAzimuth] = useState(false);
+  const [fixedAzimuth, setFixedAzimuth] = useState(null);
 
   useEffect(() => {
     const savedPosition = localStorage.getItem('position');
@@ -103,12 +104,6 @@ const Form = () => {
   };
 
   const startCompass = async () => {
-    if (isTrackingAzimuth) {
-      window.removeEventListener('deviceorientation', updateAzimuth);
-      setIsTrackingAzimuth(false);
-      return;
-    }
-
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
       const permission = await DeviceOrientationEvent.requestPermission();
       if (permission !== 'granted') {
@@ -119,15 +114,13 @@ const Form = () => {
 
     setIsTrackingAzimuth(true);
 
-    const oneTimeUpdate = event => {
-      if (event.alpha !== null) {
-        setValue('azimuth', Math.round(event.alpha));
-        window.removeEventListener('deviceorientation', oneTimeUpdate);
-        setIsTrackingAzimuth(false);
-      }
-    };
+    window.addEventListener('deviceorientation', updateAzimuth);
+  };
 
-    window.addEventListener('deviceorientation', oneTimeUpdate);
+  const stopCompass = () => {
+    window.removeEventListener('deviceorientation', updateAzimuth);
+    setIsTrackingAzimuth(false);
+    setFixedAzimuth(watch('azimuth'));
   };
 
   const updateAzimuth = event => {
@@ -280,7 +273,7 @@ const Form = () => {
           </label>
           <div>
             {isTrackingAzimuth ? (
-              <button type="button" className="red" onClick={startCompass}>
+              <button type="button" className="red" onClick={stopCompass}>
                 Зупинити
               </button>
             ) : (
@@ -290,7 +283,13 @@ const Form = () => {
             )}
           </div>
         </div>
-        <input className="input" id="azimuth" type="number" {...register('azimuth')} />
+        <input
+          className="input"
+          id="azimuth"
+          type="number"
+          {...register('azimuth')}
+          value={fixedAzimuth !== null ? fixedAzimuth : watch('azimuth')}
+        />
       </div>
 
       <div className="pb-4">
