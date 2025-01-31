@@ -3,9 +3,6 @@ import { useForm } from 'react-hook-form';
 import useFormPersist from 'react-hook-form-persist';
 
 const Form = () => {
-  const [isTrackingAzimuth, setIsTrackingAzimuth] = useState(false);
-  const [azimuth, setAzimuth] = useState(null);
-
   const { register, handleSubmit, watch, setValue, reset } = useForm({
     defaultValues: {
       position: '',
@@ -26,6 +23,8 @@ const Form = () => {
   });
 
   useFormPersist('targetForm', { watch, setValue, storage: window.localStorage });
+
+  const [isTrackingAzimuth, setIsTrackingAzimuth] = useState(false);
 
   useEffect(() => {
     const savedPosition = localStorage.getItem('position');
@@ -103,28 +102,30 @@ const Form = () => {
     );
   };
 
-  const toggleTracking = () => {
+  const startCompass = async () => {
     if (isTrackingAzimuth) {
-      window.removeEventListener('deviceorientation', handleOrientation);
+      window.removeEventListener('deviceorientation', updateAzimuth);
       setIsTrackingAzimuth(false);
-    } else {
-      window.addEventListener('deviceorientation', handleOrientation);
-      setIsTrackingAzimuth(true);
+      return;
     }
+
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      const permission = await DeviceOrientationEvent.requestPermission();
+      if (permission !== 'granted') {
+        alert('Доступ до компаса відхилено!');
+        return;
+      }
+    }
+
+    setIsTrackingAzimuth(true);
+    window.addEventListener('deviceorientation', updateAzimuth);
   };
 
-  const handleOrientation = event => {
-    const { alpha } = event;
-    if (alpha !== null) {
-      setAzimuth(Math.round(alpha));
+  const updateAzimuth = event => {
+    if (event.alpha !== null) {
+      setValue('azimuth', event.alpha.toFixed(2));
     }
   };
-
-  useEffect(() => {
-    return () => {
-      window.removeEventListener('deviceorientation', handleOrientation);
-    };
-  }, []);
 
   const onSubmit = data => {
     const sanitizedData = {
@@ -274,20 +275,13 @@ const Form = () => {
               className={`button ${
                 isTrackingAzimuth ? 'bg-red-500 hover:bg-red-600' : 'bg-sky-500 hover:bg-sky-600'
               }`}
-              onClick={toggleTracking}
+              onClick={startCompass}
             >
               {isTrackingAzimuth ? 'Зупинити' : 'Отримати дані з компасу'}
             </button>
           </div>
         </div>
-        <input
-          className="input"
-          id="azimuth"
-          type="number"
-          {...register('azimuth')}
-          value={azimuth !== null ? azimuth : ''}
-          onChange={e => setAzimuth(e.target.value)}
-        />
+        <input className="input" id="azimuth" type="number" {...register('azimuth')} />
       </div>
 
       <div className="pb-4">
