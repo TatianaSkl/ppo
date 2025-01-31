@@ -120,7 +120,7 @@ const Form = () => {
   const stopCompass = () => {
     window.removeEventListener('deviceorientation', updateAzimuth);
     setIsTrackingAzimuth(false);
-    setFixedAzimuth(watch('azimuth'));
+    // setFixedAzimuth(watch('azimuth'));
   };
 
   const updateAzimuth = event => {
@@ -287,8 +287,8 @@ const Form = () => {
           className="input"
           id="azimuth"
           type="number"
-          {...register('azimuth')}
-          value={fixedAzimuth !== null ? fixedAzimuth : watch('azimuth')}
+          value={fixedAzimuth}
+          onChange={e => setFixedAzimuth(e.target.value)}
         />
       </div>
 
