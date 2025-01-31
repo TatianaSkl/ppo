@@ -118,12 +118,21 @@ const Form = () => {
     }
 
     setIsTrackingAzimuth(true);
-    window.addEventListener('deviceorientation', updateAzimuth);
+
+    const oneTimeUpdate = event => {
+      if (event.alpha !== null) {
+        setValue('azimuth', Math.round(event.alpha));
+        window.removeEventListener('deviceorientation', oneTimeUpdate);
+        setIsTrackingAzimuth(false);
+      }
+    };
+
+    window.addEventListener('deviceorientation', oneTimeUpdate);
   };
 
   const updateAzimuth = event => {
     if (event.alpha !== null) {
-      setValue('azimuth', event.alpha.toFixed(2));
+      setValue('azimuth', Math.round(event.alpha));
     }
   };
 
@@ -270,15 +279,15 @@ const Form = () => {
             Азимут цілі:
           </label>
           <div>
-            <button
-              type="button"
-              className={`button ${
-                isTrackingAzimuth ? 'bg-red-500 hover:bg-red-600' : 'bg-sky-500 hover:bg-sky-600'
-              }`}
-              onClick={startCompass}
-            >
-              {isTrackingAzimuth ? 'Зупинити' : 'Отримати дані з компасу'}
-            </button>
+            {isTrackingAzimuth ? (
+              <button type="button" className="red" onClick={startCompass}>
+                Зупинити
+              </button>
+            ) : (
+              <button type="button" className="button" onClick={startCompass}>
+                Отримати дані з компасу
+              </button>
+            )}
           </div>
         </div>
         <input className="input" id="azimuth" type="number" {...register('azimuth')} />
