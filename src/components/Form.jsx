@@ -127,7 +127,7 @@ const Form = () => {
 
   const updateAzimuth = event => {
     if (event.alpha !== null) {
-      setValue('azimuth', Math.round(450 - event.alpha));
+      setValue('azimuth', Math.round(360 - event.alpha));
     }
   };
 
@@ -152,7 +152,7 @@ const Form = () => {
 
   const updateCourse = event => {
     if (event.alpha !== null) {
-      setValue('course', Math.round(450 - event.alpha));
+      setValue('course', Math.round(360 - event.alpha));
     }
   };
 
